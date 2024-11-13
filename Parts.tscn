@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3 uid="uid://cwe8ggtn4au7o"]
+
+[ext_resource type="Script" path="res://Parts.cs" id="1_f7beq"]
+[ext_resource type="Texture2D" uid="uid://bfvseg6i74lho" path="res://textures/play-circle.png" id="1_sq40a"]
+[ext_resource type="Texture2D" uid="uid://qaqm80iy5e1y" path="res://textures/arrow-up.png" id="1_vek2c"]
+
+[node name="Parts" type="VBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_f7beq")
+
+[node name="Start" type="GraphNode" parent="."]
+layout_mode = 2
+offset_right = 132.0
+offset_bottom = 153.0
+title = "Start"
+slot/0/left_enabled = false
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+
+[node name="Control" type="Control" parent="Start"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Start"]
+layout_mode = 2
+texture = ExtResource("1_sq40a")
+
+[node name="Forward" type="GraphNode" parent="."]
+layout_mode = 2
+offset_top = 157.0
+offset_right = 132.0
+offset_bottom = 310.0
+title = "Go forward"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 1, 1, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(1, 1, 1, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = false
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+
+[node name="Control" type="Control" parent="Forward"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Forward"]
+layout_mode = 2
+texture = ExtResource("1_vek2c")
