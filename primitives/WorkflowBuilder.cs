@@ -1,8 +1,9 @@
 using Godot;
 using System;
 using Godot.Collections;
+using Robozzle.primitives;
 
-public partial class Connection : GraphEdit
+public partial class WorkflowBuilder : GraphEdit
 {
 	private Dictionary<Node, bool> _selectedNodes = new Dictionary<Node, bool>();
 
@@ -10,14 +11,31 @@ public partial class Connection : GraphEdit
 	{
 		Parts.Instance.Hide();
 		
-		var button = new Button();
-		button.Text = "Add Node";
-		button.Pressed += () =>
+		AddButton("Forward", () =>
 		{
-			var node = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
-			AddChild(node);
-		};
-		this.GetZoomHBox().AddChild(button);
+			var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
+			AddChild(forwardNode);
+		});
+		
+		AddButton("Right", () =>
+		{
+			var rightNode = Parts.Instance.GetNode("Right").Duplicate() as GraphNode;
+			AddChild(rightNode);
+		});
+		
+		AddButton("Left", () =>
+		{
+			var leftNode = Parts.Instance.GetNode("Left").Duplicate() as GraphNode;
+			AddChild(leftNode);
+		});
+		
+		AddButton("Evaluate", () =>
+		{
+			var level = GetParent().GetParent<Level>();
+			Visible = false;
+			level.Start();
+			level.GetNode("Player").GetNode<Player>("Player").ParseGraph();
+		});
 
 		var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
 		AddChild(startNode);
@@ -31,6 +49,14 @@ public partial class Connection : GraphEdit
 
 		this.ConnectionRequest += OnConnectionRequest;
 		this.DisconnectionRequest += OnDisconnectRequest;
+	}
+
+	private void AddButton(string title, Action action)
+	{
+		var button = new Button();
+		button.Text = title;
+		button.Pressed += action;
+		GetZoomHBox().AddChild(button);
 	}
 
 	private void OnNodeSelected(Node node)

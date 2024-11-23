@@ -64,6 +64,8 @@ slot/1/right_type = 0
 slot/1/right_color = Color(1, 1, 1, 1)
 slot/1/right_icon = null
 slot/1/draw_stylebox = true
+metadata/type = "action"
+metadata/action = "forward"
 
 [node name="Control" type="Control" parent="Forward"]
 layout_mode = 2
