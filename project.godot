@@ -19,7 +19,12 @@ config/icon="res://icon.svg"
 
 Parts="*res://Parts.tscn"
 SceneLoader="*res://primitives/SceneLoader.tscn"
+ToastParty="*res://addons/toastparty/toast-autoload.gd"
 
 [dotnet]
 
 project/assembly_name="Robozzle"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/toastparty/plugin.cfg")
