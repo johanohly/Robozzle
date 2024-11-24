@@ -45,10 +45,9 @@ public partial class Player : Sprite2D
 					break;
 			}
 
-			var cancel = CheckTile();
+			var cancel = _level.CheckTile();
 			if (cancel)
 			{
-				_level.Reset();
 				return;
 			}
 
@@ -75,36 +74,6 @@ public partial class Player : Sprite2D
 				await Rotate(Rotation - Mathf.Pi / 2);
 				break;
 		}
-	}
-
-	private bool CheckTile()
-	{
-		var cancel = CheckStar();
-		if (cancel) return true;
-
-		var outOfBounds = CheckOB();
-		if (outOfBounds) return true;
-
-		return false;
-	}
-
-	private bool CheckStar()
-	{
-		var tilePosition = _level.ForegroundTileMap.LocalToMap(Position);
-		var atlasPosition = _level.ForegroundTileMap.GetCellAtlasCoords(tilePosition);
-		if (atlasPosition != Level.StarAtlasPosition) return false;
-		GD.Print("Star collected!");
-		_level.ForegroundTileMap.SetCell(tilePosition, -1);
-		return false;
-	}
-
-	private bool CheckOB()
-	{
-		var tilePosition = _level.BackgroundTileMap.LocalToMap(Position);
-		var atlasPosition = _level.BackgroundTileMap.GetCellAtlasCoords(tilePosition);
-		if (atlasPosition != Level.OutOfBoundsAtlasPosition) return false;
-
-		return true;
 	}
 
 	private async Task MoveForward()

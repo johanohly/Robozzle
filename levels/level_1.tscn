@@ -5,7 +5,13 @@
 [ext_resource type="PackedScene" uid="uid://dkia0lyot1ie0" path="res://primitives/Player.tscn" id="2_82wgk"]
 [ext_resource type="PackedScene" uid="uid://bnhoc1irfyqd5" path="res://primitives/WorkflowBuilder.tscn" id="3_jk40c"]
 
-[node name="Level1" type="Node2D"]
+[node name="Level1" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_4kofo")
 
 [node name="Background" type="TileMapLayer" parent="."]
@@ -19,3 +25,4 @@ tile_set = ExtResource("1_qa5i3")
 [node name="Player" parent="." instance=ExtResource("2_82wgk")]
 
 [node name="WorkflowBuilder" parent="." instance=ExtResource("3_jk40c")]
+layout_mode = 1

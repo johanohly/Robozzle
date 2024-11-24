@@ -34,14 +34,19 @@ public partial class WorkflowBuilder : GraphEdit
 			var level = GetParent().GetParent<Level>();
 			Visible = false;
 			level.Start();
-			level.GetNode("Player").GetNode<Player>("Player").ParseGraph();
+			level.GetNode<Player>("Player/Player").ParseGraph();
+		});
+		
+		AddButton("To level", () =>
+		{
+			GetParent().GetParent<Level>().ToLevel();
 		});
 
 		var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
 		AddChild(startNode);
 
 		var previousNode = startNode;
-		for (var i = 0; i < 5; i++)
+		for (var i = 0; i < 4; i++)
 		{
 			var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
 			AddChild(forwardNode);
