@@ -1,130 +1,151 @@
 using Godot;
 using System;
-using Godot.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Robozzle.primitives;
 
 public partial class WorkflowBuilder : GraphEdit
 {
-	private Dictionary<Node, bool> _selectedNodes = new Dictionary<Node, bool>();
+    private Dictionary<Node, bool> _selectedNodes = new();
+    private Dictionary<string, int> _usedBlocks = new();
 
-	public override void _Ready()
-	{
-		Parts.Instance.Hide();
-		
-		AddButton("Forward", () =>
-		{
-			var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
-			AddChild(forwardNode);
-		});
-		
-		AddButton("Right", () =>
-		{
-			var rightNode = Parts.Instance.GetNode("Right").Duplicate() as GraphNode;
-			AddChild(rightNode);
-		});
-		
-		AddButton("Left", () =>
-		{
-			var leftNode = Parts.Instance.GetNode("Left").Duplicate() as GraphNode;
-			AddChild(leftNode);
-		});
-		
-		AddButton("Is green", () =>
-		{
-			var conditionNode = Parts.Instance.GetNode("Green").Duplicate() as GraphNode;
-			AddChild(conditionNode);
-		});
-		
-		AddButton("Evaluate", () =>
-		{
-			var level = GetParent().GetParent<Level>();
-			Visible = false;
-			level.Start();
-			level.GetNode<Player>("Player/Player").ParseGraph();
-		});
-		
-		AddButton("To level", () =>
-		{
-			GetParent().GetParent<Level>().ToLevel();
-		});
+    private Level _level = null;
 
-		var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
-		AddChild(startNode);
+    public override void _Ready()
+    {
+        _level = GetParent<Node>().GetParent<Level>();
+        Parts.Instance.Hide();
 
-		var previousNode = startNode;
-		for (var i = 0; i < 4; i++)
-		{
-			var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
-			AddChild(forwardNode);
-			ConnectNode(previousNode.Name, 0, forwardNode.Name, 0);
-			previousNode = forwardNode;
-		}
+        this.NodeSelected += OnNodeSelected;
+        this.NodeDeselected += OnNodeDeselected;
+        this.DeleteNodesRequest += OnDeleteNodesRequest;
 
-		this.NodeSelected += OnNodeSelected;
-		this.NodeDeselected += OnNodeDeselected;
-		this.DeleteNodesRequest += OnDeleteNodesRequest;
+        this.ConnectionRequest += OnConnectionRequest;
+        this.DisconnectionRequest += OnDisconnectRequest;
+    }
 
-		this.ConnectionRequest += OnConnectionRequest;
-		this.DisconnectionRequest += OnDisconnectRequest;
-	}
+    public void InitControls()
+    {
+        _level.AllowedBlocks.Keys.ToList().ForEach(key => _usedBlocks[key] = 0);
 
-	private void AddButton(string title, Action action)
-	{
-		var button = new Button();
-		button.Text = title;
-		button.Pressed += action;
-		GetZoomHBox().AddChild(button);
-	}
+        AddLimitedButton("forward", "Forward");
+        AddLimitedButton("left", "Left");
+        AddLimitedButton("right", "Right");
+        AddLimitedButton("green", "Is green");
 
-	private void OnNodeSelected(Node node)
-	{
-		var graphNode = node as GraphNode;
-		if (graphNode.Title == "Start")
-		{
-			return;
-		}
+        AddButton("Evaluate", () =>
+        {
+            var level = GetParent().GetParent<Level>();
+            Visible = false;
+            level.Start();
+            level.GetNode<Player>("Player/Player").ParseGraph();
+        });
 
-		_selectedNodes.Add(node, true);
-	}
+        AddButton("To level", () => { GetParent().GetParent<Level>().ToLevel(); });
 
-	private void OnNodeDeselected(Node node)
-	{
-		_selectedNodes.Remove(node);
-	}
+        var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
+        AddChild(startNode);
+    }
 
-	private void _RemoveConnectionsToNode(Node node)
-	{
-		foreach (var con in this.GetConnectionList())
-		{
-			if ((string)con["from_node"] == node.Name || (string)con["to_node"] == node.Name)
-			{
-				this.DisconnectNode((string)con["from_node"], (int)con["from_port"], (string)con["to_node"],
-					(int)con["to_port"]);
-			}
-		}
-	}
+    private void AddLimitedButton(string key, string name)
+    {
+        if (!_level.AllowedBlocks.ContainsKey(key))
+        {
+            return;
+        }
 
-	private void OnDeleteNodesRequest(Godot.Collections.Array array)
-	{
-		foreach (var node in _selectedNodes.Keys)
-		{
-			if (_selectedNodes[node])
-			{
-				_RemoveConnectionsToNode(node);
-				node.QueueFree();
-			}
-		}
+        var button = new Button();
+        button.Name = key;
+        button.Text = $"{name} ({_usedBlocks[key]}/{_level.AllowedBlocks[key]})";
+        button.Pressed += () => AddBlock(key, name);
+        GetZoomHBox().AddChild(button);
+    }
 
-		_selectedNodes.Clear();
-	}
+    private void AddButton(string title, Action action)
+    {
+        var button = new Button();
+        button.Text = title;
+        button.Pressed += action;
+        GetZoomHBox().AddChild(button);
+    }
 
-	private void OnConnectionRequest(StringName fromNode, long fromPort, StringName toNode, long toPort)
-	{
-		this.ConnectNode(fromNode, (int)fromPort, toNode, (int)toPort);
-	}
+    private void AddBlock(string key, string name)
+    {
+        if (_usedBlocks[key] >= _level.AllowedBlocks[key])
+        {
+            return;
+        }
 
-	private void OnDisconnectRequest(StringName fromNode, long fromPort, StringName toNode, long toPort)
-	{
-		this.DisconnectNode(fromNode, (int)fromPort, toNode, (int)toPort);
-	}
+        var node = Parts.Instance.GetNode(name).Duplicate() as GraphNode;
+        AddChild(node);
+        _usedBlocks[key]++;
+        GetZoomHBox().GetNode<Button>(key).Text = $"{name} ({_usedBlocks[key]}/{_level.AllowedBlocks[key]})";
+    }
+
+    private void RemoveBlock(Node node)
+    {
+        var action = (string)node.Get("metadata/action");
+        var condition = (string)node.Get("metadata/condition");
+        var key = action != "" ? action : condition;
+        if (key == "") return;
+
+        if (!_usedBlocks.ContainsKey(key)) return;
+        _usedBlocks[key]--;
+        var btn = GetZoomHBox().GetNode<Button>(key);
+        btn.Text = Regex.Replace(btn.Text, @"\(.*\)", $"({_usedBlocks[key]}/{_level.AllowedBlocks[key]})");
+    }
+
+    private void OnNodeSelected(Node node)
+    {
+        var graphNode = node as GraphNode;
+        if (graphNode.Title == "Start")
+        {
+            return;
+        }
+
+        _selectedNodes.Add(node, true);
+    }
+
+    private void OnNodeDeselected(Node node)
+    {
+        _selectedNodes.Remove(node);
+    }
+
+    private void _RemoveConnectionsToNode(Node node)
+    {
+        foreach (var con in GetConnectionList())
+        {
+            if ((string)con["from_node"] == node.Name || (string)con["to_node"] == node.Name)
+            {
+                DisconnectNode((string)con["from_node"], (int)con["from_port"], (string)con["to_node"],
+                    (int)con["to_port"]);
+            }
+        }
+    }
+
+    private void OnDeleteNodesRequest(Godot.Collections.Array array)
+    {
+        foreach (var node in _selectedNodes.Keys)
+        {
+            if (_selectedNodes[node])
+            {
+                _RemoveConnectionsToNode(node);
+                RemoveBlock(node);
+                node.QueueFree();
+            }
+        }
+
+        _selectedNodes.Clear();
+    }
+
+    private void OnConnectionRequest(StringName fromNode, long fromPort, StringName toNode, long toPort)
+    {
+        ConnectNode(fromNode, (int)fromPort, toNode, (int)toPort);
+    }
+
+    private void OnDisconnectRequest(StringName fromNode, long fromPort, StringName toNode, long toPort)
+    {
+        DisconnectNode(fromNode, (int)fromPort, toNode, (int)toPort);
+    }
 }

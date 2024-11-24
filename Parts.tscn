@@ -145,7 +145,7 @@ layout_mode = 2
 layout_mode = 2
 texture = ExtResource("5_fjccw")
 
-[node name="Green" type="GraphNode" parent="."]
+[node name="Is green" type="GraphNode" parent="."]
 layout_mode = 2
 offset_top = 628.0
 offset_right = 132.0
@@ -172,9 +172,9 @@ slot/1/draw_stylebox = true
 metadata/type = "condition"
 metadata/condition = "green"
 
-[node name="Control" type="Control" parent="Green"]
+[node name="Control" type="Control" parent="Is green"]
 layout_mode = 2
 
-[node name="TextureRect" type="TextureRect" parent="Green"]
+[node name="TextureRect" type="TextureRect" parent="Is green"]
 layout_mode = 2
 texture = ExtResource("6_84ri8")

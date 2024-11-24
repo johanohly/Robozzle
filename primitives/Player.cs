@@ -41,7 +41,6 @@ public partial class Player : Sprite2D
 
 				case NodeType.Condition:
 					var conditionMet = EvaluateCondition(currentNode.Condition);
-					GD.Print(conditionMet, currentNode.YesBranch.Action, currentNode.NoBranch.Action);
 					currentNode = conditionMet ? currentNode.YesBranch : currentNode.NoBranch;
 					break;
 			}
