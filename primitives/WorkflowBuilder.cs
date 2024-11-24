@@ -40,8 +40,14 @@ public partial class WorkflowBuilder : GraphEdit
 		var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
 		AddChild(startNode);
 
-		var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
-		AddChild(forwardNode);
+		var previousNode = startNode;
+		for (var i = 0; i < 5; i++)
+		{
+			var forwardNode = Parts.Instance.GetNode("Forward").Duplicate() as GraphNode;
+			AddChild(forwardNode);
+			ConnectNode(previousNode.Name, 0, forwardNode.Name, 0);
+			previousNode = forwardNode;
+		}
 
 		this.NodeSelected += OnNodeSelected;
 		this.NodeDeselected += OnNodeDeselected;

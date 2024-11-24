@@ -27,22 +27,15 @@ namespace Robozzle.Primitives
             }
 
             if (Nodes.Count <= 0) return null;
-            var startNodeName = GetStartNode();
             var visited = new Dictionary<string, NodeTree>();
-            return BuildNodeTree(startNodeName, visited);
-        }
-
-        private string GetStartNode()
-        {
-            var destinations = new HashSet<string>(Connections.SelectMany(entry => entry.Value));
-            return Nodes.Keys.FirstOrDefault(nodeName => !destinations.Contains(nodeName));
+            var startNode = Connections["Start"].First();
+            return BuildNodeTree(startNode, visited);
         }
 
         private NodeTree BuildNodeTree(string nodeName, Dictionary<string, NodeTree> visited)
         {
             if (visited.ContainsKey(nodeName))
             {
-                // Return the existing node to handle loops
                 return visited[nodeName];
             }
 
@@ -50,7 +43,7 @@ namespace Robozzle.Primitives
                 return null;
 
             var nodeTree = new NodeTree { Name = nodeName };
-            visited[nodeName] = nodeTree; // Mark this node as visited
+            visited[nodeName] = nodeTree;
 
             var nodeType = (string)node.Get("metadata/type");
             switch (nodeType)
@@ -60,6 +53,13 @@ namespace Robozzle.Primitives
                     break;
                 case "action":
                     ParseActionNode(node, nodeTree);
+                    if (Connections[nodeName].Count > 0)
+                    {
+                        // Link the next node for sequential actions
+                        var nextNodeName = Connections[nodeName].First();
+                        nodeTree.NextNode = BuildNodeTree(nextNodeName, visited);
+                    }
+
                     break;
                 default:
                     GD.PrintErr($"Unknown node type: {nodeType}");
@@ -95,12 +95,13 @@ namespace Robozzle.Primitives
 
     public class NodeTree
     {
-        public string Name { get; set; } // Unique identifier for this node
+        public string Name { get; set; }
         public NodeType NodeType { get; set; }
-        public string Condition { get; set; } // For condition nodes
-        public string Action { get; set; } // For action nodes
-        public NodeTree YesBranch { get; set; } // For conditions
-        public NodeTree NoBranch { get; set; } // For conditions
+        public string Condition { get; set; }
+        public string Action { get; set; }
+        public NodeTree YesBranch { get; set; }
+        public NodeTree NoBranch { get; set; }
+        public NodeTree NextNode { get; set; }
     }
 
     public enum NodeType

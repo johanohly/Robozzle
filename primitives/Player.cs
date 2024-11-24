@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 using System.Threading.Tasks;
+using Robozzle.primitives;
 using Robozzle.Primitives;
 
 public partial class Player : Sprite2D
@@ -8,10 +10,12 @@ public partial class Player : Sprite2D
     private const float TileSize = 64f;
     private const float MoveSpeed = 1f;
     private const float RotationSpeed = .5f;
+    private Level _level = null;
 
     public override void _Ready()
     {
         Position = new Vector2(32, 32);
+        _level = GetParent<Node>().GetParent<Level>();
     }
 
     public void ParseGraph()
@@ -22,28 +26,34 @@ public partial class Player : Sprite2D
         ExecuteTree(result);
     }
 
-    private static void ExecuteTree(NodeTree nodeTree, HashSet<string> visited = null)
+    private async Task ExecuteTree(NodeTree nodeTree)
     {
-        if (nodeTree == null || (visited != null && visited.Contains(nodeTree.Name)))
-            return;
+        var currentNode = nodeTree;
 
-        visited ??= new HashSet<string>();
-        visited.Add(nodeTree.Name);
-
-        switch (nodeTree.NodeType)
+        while (currentNode != null)
         {
-            case NodeType.Action:
-                GD.Print($"Performing action: {nodeTree.Action}");
-                break;
+            switch (currentNode.NodeType)
+            {
+                case NodeType.Action:
+                    await ExecuteAction(currentNode.Action);
+                    currentNode = currentNode.NextNode;
+                    break;
 
-            case NodeType.Condition:
-                var conditionResult = EvaluateCondition(nodeTree.Condition);
-                GD.Print($"Condition '{nodeTree.Condition}' evaluated to: {conditionResult}");
-                ExecuteTree(conditionResult ? nodeTree.YesBranch : nodeTree.NoBranch, visited);
-                break;
+                case NodeType.Condition:
+                    var conditionMet = EvaluateCondition(currentNode.Condition);
+                    currentNode = conditionMet ? currentNode.YesBranch : currentNode.NoBranch;
+                    break;
+            }
+
+            var cancel = CheckTile();
+            if (cancel)
+            {
+                _level.Reset();
+                return;
+            }
+
+            await ToSignal(GetTree().CreateTimer(MoveSpeed / 2), "timeout");
         }
-
-        visited.Remove(nodeTree.Name);
     }
 
     private static bool EvaluateCondition(string condition)
@@ -51,26 +61,50 @@ public partial class Player : Sprite2D
         return condition == "is tile green";
     }
 
-
-    public async Task ExecuteSequence(string[] moves)
+    private async Task ExecuteAction(string action)
     {
-        foreach (var move in moves)
+        switch (action)
         {
-            switch (move)
-            {
-                case "forward":
-                    await MoveForward();
-                    break;
-                case "right":
-                    await Rotate(Rotation + Mathf.Pi / 2);
-                    break;
-                case "left":
-                    await Rotate(Rotation - Mathf.Pi / 2);
-                    break;
-            }
-
-            await ToSignal(GetTree().CreateTimer(MoveSpeed / 2), "timeout");
+            case "forward":
+                await MoveForward();
+                break;
+            case "right":
+                await Rotate(Rotation + Mathf.Pi / 2);
+                break;
+            case "left":
+                await Rotate(Rotation - Mathf.Pi / 2);
+                break;
         }
+    }
+
+    private bool CheckTile()
+    {
+        var cancel = CheckStar();
+        if (cancel) return true;
+
+        var outOfBounds = CheckOB();
+        if (outOfBounds) return true;
+
+        return false;
+    }
+
+    private bool CheckStar()
+    {
+        var tilePosition = _level.ForegroundTileMap.LocalToMap(Position);
+        var atlasPosition = _level.ForegroundTileMap.GetCellAtlasCoords(tilePosition);
+        if (atlasPosition != Level.StarAtlasPosition) return false;
+        GD.Print("Star collected!");
+        _level.ForegroundTileMap.SetCell(tilePosition, -1);
+        return false;
+    }
+
+    private bool CheckOB()
+    {
+        var tilePosition = _level.BackgroundTileMap.LocalToMap(Position);
+        var atlasPosition = _level.BackgroundTileMap.GetCellAtlasCoords(tilePosition);
+        if (atlasPosition != Level.OutOfBoundsAtlasPosition) return false;
+
+        return true;
     }
 
     private async Task MoveForward()
