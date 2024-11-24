@@ -21,6 +21,8 @@ public partial class Level : Node
 	public static readonly Vector2I StartAtlasPosition = new Vector2I(16, 3);
 	public static readonly Vector2I StarAtlasPosition = new Vector2I(14, 1);
 	public static readonly Vector2I OutOfBoundsAtlasPosition = new Vector2I(0, 0);
+	public static readonly Vector2I GreenAtlasPosition = new Vector2I(18, 9);
+	public static readonly Vector2I RedAtlasPosition = new Vector2I(18, 8);
 
 	public override void _Ready()
 	{
@@ -80,26 +82,32 @@ public partial class Level : Node
 			ForegroundTileMap.SetCell(position, 0, StarAtlasPosition);
 		}
 	}
-	
+
 	public void ToWorkflowBuilder()
 	{
 		_player.Visible = false;
 		ForegroundTileMap.Visible = false;
 		BackgroundTileMap.Visible = false;
-		
+
 		_workflowBuilder.Visible = true;
 		_workflowBuilderButton.Visible = false;
-		GD.Print("ToWorkflowBuilder");
 	}
-	
+
 	public void ToLevel()
 	{
 		_player.Visible = true;
 		ForegroundTileMap.Visible = true;
 		BackgroundTileMap.Visible = true;
-		
+
 		_workflowBuilder.Visible = false;
 		_workflowBuilderButton.Visible = true;
+	}
+
+	public bool IsGreenTile()
+	{
+		var tilePosition = BackgroundTileMap.LocalToMap(_player.Position);
+		var atlasPosition = BackgroundTileMap.GetCellAtlasCoords(tilePosition);
+		return atlasPosition == GreenAtlasPosition;
 	}
 
 	public bool CheckTile()

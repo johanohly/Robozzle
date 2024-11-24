@@ -29,6 +29,12 @@ public partial class WorkflowBuilder : GraphEdit
 			AddChild(leftNode);
 		});
 		
+		AddButton("Is green", () =>
+		{
+			var conditionNode = Parts.Instance.GetNode("Green").Duplicate() as GraphNode;
+			AddChild(conditionNode);
+		});
+		
 		AddButton("Evaluate", () =>
 		{
 			var level = GetParent().GetParent<Level>();

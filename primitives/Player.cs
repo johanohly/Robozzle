@@ -41,6 +41,7 @@ public partial class Player : Sprite2D
 
 				case NodeType.Condition:
 					var conditionMet = EvaluateCondition(currentNode.Condition);
+					GD.Print(conditionMet, currentNode.YesBranch.Action, currentNode.NoBranch.Action);
 					currentNode = conditionMet ? currentNode.YesBranch : currentNode.NoBranch;
 					break;
 			}
@@ -55,9 +56,15 @@ public partial class Player : Sprite2D
 		}
 	}
 
-	private static bool EvaluateCondition(string condition)
+	private bool EvaluateCondition(string condition)
 	{
-		return condition == "is tile green";
+		switch (condition)
+		{
+			case "green":
+				return _level.IsGreenTile();
+		}
+
+		return false;
 	}
 
 	private async Task ExecuteAction(string action)

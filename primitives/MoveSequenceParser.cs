@@ -55,7 +55,6 @@ namespace Robozzle.Primitives
                     ParseActionNode(node, nodeTree);
                     if (Connections[nodeName].Count > 0)
                     {
-                        // Link the next node for sequential actions
                         var nextNodeName = Connections[nodeName].First();
                         nodeTree.NextNode = BuildNodeTree(nextNodeName, visited);
                     }
