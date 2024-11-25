@@ -42,7 +42,8 @@ public partial class WorkflowBuilder : GraphEdit
             level.GetNode<Player>("Player/Player").ParseGraph();
         });
 
-        AddButton("To level", () => { GetParent().GetParent<Level>().ToLevel(); });
+        AddButton("See level", () => { GetParent().GetParent<Level>().ToLevel(); });
+        AddButton("Level select", () => { GetNode<SceneLoader>("/root/SceneLoader").GotoScene("Main"); });
 
         var startNode = Parts.Instance.GetNode("Start").Duplicate() as GraphNode;
         AddChild(startNode);
