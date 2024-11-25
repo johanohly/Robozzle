@@ -45,3 +45,7 @@ text = "Level 3"
 [node name="Level4" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer"]
 layout_mode = 2
 text = "Level 4"
+
+[node name="Level5" type="Button" parent="CenterContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "Level 5"
