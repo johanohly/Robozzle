@@ -155,7 +155,7 @@ public partial class Level : Node
             toastData.Add("bgcolor", new Color(0, 255, 0));
             GetNode("/root/ToastParty").Call("show", toastData);
             GetNode<GameData>("/root/GameData").SetLevel(int.Parse(Regex.Match(Name, @"\d+").Value) + 1);
-            RetryInWorkflowBuilder();
+            GetNode<SceneLoader>("/root/SceneLoader").GotoScene("Main");
             return true;
         }
 
