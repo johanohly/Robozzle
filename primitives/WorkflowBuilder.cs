@@ -33,6 +33,7 @@ public partial class WorkflowBuilder : GraphEdit
         AddLimitedButton("left", "Left");
         AddLimitedButton("right", "Right");
         AddLimitedButton("green", "Is green");
+        AddLimitedButton("red", "Is red");
 
         AddButton("Evaluate", () =>
         {

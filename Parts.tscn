@@ -178,3 +178,37 @@ layout_mode = 2
 [node name="TextureRect" type="TextureRect" parent="Is green"]
 layout_mode = 2
 texture = ExtResource("6_84ri8")
+
+[node name="Is red" type="GraphNode" parent="."]
+layout_mode = 2
+offset_top = 785.0
+offset_right = 132.0
+offset_bottom = 938.0
+title = "Is red"
+slot/0/left_enabled = true
+slot/0/left_type = 0
+slot/0/left_color = Color(1, 1, 1, 1)
+slot/0/left_icon = null
+slot/0/right_enabled = true
+slot/0/right_type = 0
+slot/0/right_color = Color(1, 0.24, 0.24, 1)
+slot/0/right_icon = null
+slot/0/draw_stylebox = true
+slot/1/left_enabled = false
+slot/1/left_type = 0
+slot/1/left_color = Color(0.17, 1, 0.446667, 1)
+slot/1/left_icon = null
+slot/1/right_enabled = true
+slot/1/right_type = 0
+slot/1/right_color = Color(1, 1, 1, 1)
+slot/1/right_icon = null
+slot/1/draw_stylebox = true
+metadata/type = "condition"
+metadata/condition = "red"
+
+[node name="Control" type="Control" parent="Is red"]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="Is red"]
+layout_mode = 2
+texture = ExtResource("6_84ri8")

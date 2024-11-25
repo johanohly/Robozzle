@@ -122,6 +122,13 @@ public partial class Level : Node
         return atlasPosition == GreenAtlasPosition;
     }
 
+    public bool IsRedTile()
+    {
+        var tilePosition = BackgroundTileMap.LocalToMap(_player.Position);
+        var atlasPosition = BackgroundTileMap.GetCellAtlasCoords(tilePosition);
+        return atlasPosition == RedAtlasPosition;
+    }
+
     public bool CheckTile()
     {
         var cancel = CheckStar();

@@ -61,6 +61,8 @@ public partial class Player : Sprite2D
 		{
 			case "green":
 				return _level.IsGreenTile();
+			case "red":
+				return _level.IsRedTile();
 		}
 
 		return false;
