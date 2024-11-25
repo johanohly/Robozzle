@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Robozzle.primitives;
+using GDictionary = Godot.Collections.Dictionary;
 
 public partial class WorkflowBuilder : GraphEdit
 {
@@ -37,10 +38,18 @@ public partial class WorkflowBuilder : GraphEdit
 
         AddButton("Evaluate", () =>
         {
-            var level = GetParent().GetParent<Level>();
+            if (GetChildren().Count <= 2)
+            {
+                var toastData = new GDictionary();
+                toastData.Add("text", "No blocks to evaluate");
+                toastData.Add("bgcolor", new Color(255, 0, 0));
+                GetNode("/root/ToastParty").Call("show", toastData);
+                return;
+            }
+
             Visible = false;
-            level.Start();
-            level.GetNode<Player>("Player/Player").ParseGraph();
+            _level.Start();
+            _level.GetNode<Player>("Player/Player").ParseGraph();
         });
 
         AddButton("See level", () => { GetParent().GetParent<Level>().ToLevel(); });
